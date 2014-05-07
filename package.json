@@ -1,0 +1,19 @@
+{
+  "name": "myexpress",
+  "version": "0.0.0",
+  "description": "Building The Express App",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "liupeng",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^1.18.2",
+    "chai": "^1.9.1",
+    "supertest": "^0.10.0"
+  },
+  "dependencies": {
+    "connect": "^3.0.0-rc.1"
+  }
+}
