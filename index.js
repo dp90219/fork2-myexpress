@@ -47,7 +47,7 @@ module.exports = function() {
   };
 
   app.use = function(fn) {
-    if ('function' == fn.handle) {
+    if ('function' == typeof fn.handle) {
       var server = fn;
       fn = function(req, res, next) {
         server.handle(req, res, next);
