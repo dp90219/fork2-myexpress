@@ -28,4 +28,20 @@ describe('app', function() {
       request('localhost:' + port).get('/foo').expect(404).end(done);
     });
   });
+
+  describe(".use", function() {
+    describe("calling middleware stack", function() {
+      var app;
+      beforeEach(function() {
+        app = express();
+      });
+      it('should call a single middleware', function(done) {
+        var m1 = function(req, res, next) {
+          res.end("hello from m1");
+        };
+        app.use(m1);
+        request(app).get('/').expect('hello from m1').end(done)
+      })
+    });
+  });
 });
