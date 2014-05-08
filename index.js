@@ -7,22 +7,37 @@ module.exports = function() {
     app.handle(req, res, next);
   };
 
-  app.handle = function(req, res, next) {
+  app.handle = function(req, res, out) {
     var stack = this.stack;
-    this.stack.push({handle: function(err, req, res, next){
-      if (err) {
-        res.statusCode = 500;
-        res.end();
-      } else {
-        next();
-      }
-    }});
+    // this.stack.push({handle: function(err, req, res, next){
+    //   if (out) out(err);
+    //   if (err) {
+    //     res.statusCode = 500;
+    //     res.end();
+    //   } else {
+    //     next();
+    //   }
+    // }});
 
     function next(err) {
-      var layer = stack[index++];
-      if (!layer) {
+      if (stack === []) {
+        if (out) out();
         res.statusCode = 404;
         res.end();
+        return;
+      }
+      var layer = stack[index++];
+      if (!layer) {
+        if(err) {
+          if(out) out(err);
+          res.statusCode = 500;
+          res.end();
+        } else {
+          if(out) out();
+          res.statusCode = 404;
+          res.end();
+        }
+        return;
       }
 
       try {
@@ -48,6 +63,12 @@ module.exports = function() {
   };
 
   app.use = function(fn) {
+    if ('function' == fn.handle) {
+      var server = fn;
+      fn = function(req, res, next) {
+        server.handle(req, res, next);
+      }
+    }
     this.stack.push({handle: fn});
     return this;
   }
