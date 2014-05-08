@@ -9,14 +9,38 @@ module.exports = function() {
 
   app.handle = function(req, res, next) {
     var stack = this.stack;
-    function next() {
+    this.stack.push({handle: function(err, req, res, next){
+      if (err) {
+        res.statusCode = 500;
+        res.end();
+      } else {
+        next();
+      }
+    }});
+
+    function next(err) {
       var layer = stack[index++];
       if (!layer) {
         res.statusCode = 404;
         res.end();
-        return;
       }
-      layer.handle(req, res, next);
+
+      try {
+        var arity = layer.handle.length;
+        if (err) {
+          if (arity === 4) {
+            layer.handle(err, req, res, next);
+          } else {
+            next(err);
+          }
+        } else if (arity < 4) {
+          layer.handle(req, res, next);
+        } else {
+          next();
+        }
+      } catch(e) {
+        next(e);
+      }
     }
 
     next();
