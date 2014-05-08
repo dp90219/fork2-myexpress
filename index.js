@@ -9,23 +9,7 @@ module.exports = function() {
 
   app.handle = function(req, res, out) {
     var stack = this.stack;
-    // this.stack.push({handle: function(err, req, res, next){
-    //   if (out) out(err);
-    //   if (err) {
-    //     res.statusCode = 500;
-    //     res.end();
-    //   } else {
-    //     next();
-    //   }
-    // }});
-
     function next(err) {
-      if (stack === []) {
-        if (out) out();
-        res.statusCode = 404;
-        res.end();
-        return;
-      }
       var layer = stack[index++];
       if (!layer) {
         if(err) {

@@ -44,6 +44,9 @@ describe('app', function() {
       })
     });
   });
+});
+
+
 
 describe("Implement calling the middlewares",function() {
   var app;
@@ -195,7 +198,5 @@ describe("Implement App Embedding As Middleware",function() {
     app.use(e1);
     request(app).get("/").expect("m1 error").end(done);
   });
-
-});
 
 });
