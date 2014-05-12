@@ -218,6 +218,10 @@ describe("Layer class and the match method",function() {
     expect(layer.match("/bar")).to.be.undefined;
   });
 
+  it("return undefined if path doesn't match ex: /foo -> /foobar", function() {
+    expect(layer.match("/foobar")).to.be.undefined;
+  });
+
   it("returns matched path if layer matches the request path exactly",function() {
     var match = layer.match("/foo");
     expect(match).to.not.be.undefined;
