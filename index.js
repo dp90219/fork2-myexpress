@@ -1,5 +1,5 @@
 var http = require('http');
-var layer = require('./lib/layer');
+var Layer = require('./lib/layer');
 
 module.exports = function() {
   var index = 0;
@@ -47,9 +47,9 @@ module.exports = function() {
   };
 
   app.use = function(route, fn) {
-    if (!route) {
+    if (!fn) {
       fn = route;
-      root = '/';
+      route = '/';
     }
 
     if ('function' == typeof fn.handle) {
