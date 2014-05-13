@@ -350,6 +350,7 @@ describe("Path parameters extraction",function() {
     layer = new Layer("/foo/")
     expect(layer.match("/foo")).to.not.be.undefined;
     expect(layer.match("/foo/")).to.not.be.undefined;
+
   });
 });
 

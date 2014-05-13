@@ -2,6 +2,7 @@ var express = require('../index');
 var request = require('supertest');
 var http = require('http');
 var expect = require('chai').expect;
+var should = require('chai').should();
 
 describe('app', function() {
   var app = express();
@@ -312,3 +313,52 @@ describe("The error handlers called should match request path:",function() {
   });
 });
 
+describe("Path parameters extraction", function() {
+  var Layer, layer;
+
+  before(function() {
+    Layer = require("../lib/layer");
+    layer = new Layer("/foo/:a/:b");
+
+  });
+
+  it("returns undefined for unmatched path", function() {
+    expect(layer.match("/bar")).to.be.undefined;
+  });
+
+  it("returns undefiend if there isn't enough parameters", function() {
+    expect(layer.match("/foo/apple")).to.be.undefined;
+  });
+
+  it("returns match data for exact match", function() {
+    var match = layer.match("/foo/apple/samsung");
+    expect(match).to.not.be.undefined;
+    expect(match).to.have.property("path", "/foo/apple/samsung");
+    expect(match.params).to.deep.equal({a: 'apple', b: 'samsung'});
+  });
+
+  it("returns match data for prefix match", function() {
+    var match = layer.match('/foo/apple/xiaomi/htc');
+    expect(match).to.not.be.undefined;
+    expect(match).to.have.property('path', '/foo/apple/xiaomi');
+    expect(match.params).to.deep.equal({a: 'apple', b: 'xiaomi'});
+  });
+
+  it("should decode uri encoding", function() {
+    var match = layer.match("/foo/apple/xiao%20mi");
+    // match.params.should.deep.equal({a: 'apple', b: 'xiao mi'});
+    expect(match.params).to.deep.equal({a: 'apple', b: 'xiao mi'})
+  })
+
+  it('should strip trailing slash', function() {
+    var layer = new Layer('/');
+    expect(layer.match('/foo')).to.not.be.undefined;
+    expect(layer.match('/')).to.not.be.undefined;
+
+    layer = new Layer('/foo/');
+    expect(layer.match('/foo')).to.not.be.undefined;
+    expect(layer.match('/foo/')).not.be.undefined;
+
+  })
+
+});
