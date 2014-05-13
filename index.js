@@ -24,6 +24,7 @@ module.exports = function() {
         return;
       }
       if (layer.match(req.url)) {
+        req.params = layer.match(req.url).params;
         try {
           var arity = layer.handle.length;
           if (err) {

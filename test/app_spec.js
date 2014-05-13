@@ -1,11 +1,11 @@
-var express = require('../index');
+var my_express = require('../index');
 var request = require('supertest');
 var http = require('http');
 var expect = require('chai').expect;
 var should = require('chai').should();
 
 describe('app', function() {
-  var app = express();
+  var app = my_express();
   describe('create http server', function() {
     it("responds to /foo with 404", function(done){
       var server = http.createServer(app);
@@ -34,7 +34,7 @@ describe('app', function() {
     describe("calling middleware stack", function() {
       var app;
       beforeEach(function() {
-        app = express();
+        app = my_express();
       });
       it('should call a single middleware', function(done) {
         var m1 = function(req, res, next) {
@@ -52,7 +52,7 @@ describe('app', function() {
 describe("Implement calling the middlewares",function() {
   var app;
   beforeEach(function() {
-    app = express();
+    app = my_express();
   });
 
   it("Should be able to call a single middleware",function(done) {
@@ -105,7 +105,7 @@ describe("Implement calling the middlewares",function() {
 describe("Implement Error Handling",function() {
   var app;
   beforeEach(function() {
-    app = new express();
+    app = new my_express();
   });
 
   it("should return 500 for unhandled error", function(done) {
@@ -166,8 +166,8 @@ describe("Implement Error Handling",function() {
 describe("Implement App Embedding As Middleware",function() {
   var app, subApp;
   beforeEach(function() {
-    app = new express();
-    subApp = new express();
+    app = new my_express();
+    subApp = new my_express();
   })
 
   it("should pass unhandled request to parent",function(done) {
@@ -182,8 +182,8 @@ describe("Implement App Embedding As Middleware",function() {
   });
 
   it("should pass unhandled error to parent",function(done) {
-    app = new express();
-    subApp = new express();
+    app = new my_express();
+    subApp = new my_express();
 
     function m1(req,res,next) {
       next("m1 error");
@@ -239,7 +239,7 @@ describe("Layer class and the match method",function() {
 describe("app.use should add a Layer to stack",function() {
   var app, Layer;
   beforeEach(function() {
-    app = express();
+    app = my_express();
     Layer = require("../lib/layer");
     app.use(function() {});
     app.use("/foo",function() {});
@@ -260,7 +260,7 @@ describe("app.use should add a Layer to stack",function() {
 describe("The middlewares called should match request path:",function() {
   var app;
   before(function() {
-    app = express();
+    app = my_express();
     app.use("/foo",function(req,res,next) {
       res.end("foo");
     });
@@ -286,7 +286,7 @@ describe("The middlewares called should match request path:",function() {
 describe("The error handlers called should match request path:",function() {
   var app;
   before(function() {
-    app = express();
+    app = my_express();
     app.use("/foo",function(req,res,next) {
       throw "boom!"
     });
@@ -359,6 +359,28 @@ describe("Path parameters extraction", function() {
     expect(layer.match('/foo')).to.not.be.undefined;
     expect(layer.match('/foo/')).not.be.undefined;
 
+  });
+
+});
+
+describe("Implement req.params", function() {
+  var app;
+  before(function() {
+    app = my_express();
+    app.use("/foo/:a",function(req,res,next) {
+      res.end(req.params.a);
+    });
+
+    app.use("/foo",function(req,res,next) {
+      res.end(""+req.params.a);
+    });
+  });
+
+  it('should make path parametes accessible in req.params', function(done) {
+    request(app).get('/foo/google').expect('google').end(done);
   })
 
+  it('should make {} the deault for req.params', function(done) {
+    request(app).get('/foo').expect('undefined').end(done);
+  })
 });
