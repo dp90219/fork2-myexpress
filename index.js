@@ -1,6 +1,7 @@
 var http = require('http');
 var Layer = require('./lib/layer');
 var makeRoute = require('./lib/route');
+var methods = require('methods');
 
 module.exports = function() {
   var app = function(req, res, next) {
@@ -88,12 +89,21 @@ module.exports = function() {
     return this;
   }
 
-  app.get = function(path, handler) {
-    var fn = makeRoute("GET", handler);
-    var layer = new Layer(path, fn, true);
-    this.stack.push(layer);
-    return this;
-  }
+  // app.get = function(path, handler) {
+  //   var fn = makeRoute("GET", handler);
+  //   var layer = new Layer(path, fn, true);
+  //   this.stack.push(layer);
+  //   return this;
+  // };
+
+  methods.forEach(function(method) {
+    app[method] = function(path, handler) {
+      var fn = makeRoute(method.toUpperCase(), handler);
+      var layer = new Layer(path, fn, true);
+      this.stack.push(layer);
+      return this;
+    }
+  });
 
   app.listen = function() {
     var server = http.createServer(this);
