@@ -7,6 +7,7 @@ module.exports = function() {
   };
 
   app.handle = function(req, res, out) {
+    if(!req.prefix) req.prefix = [];
     var stack = this.stack;
     var index = 0;
     function next(err) {
@@ -16,7 +17,7 @@ module.exports = function() {
 
         if(err) {
           if (out) {
-            req.url = req.prefix + req.url;
+            req.url = req.prefix.pop() + req.url;
             // console.log("OUT: ", req.url);
             out(err);
           } else {
@@ -25,7 +26,7 @@ module.exports = function() {
           }
         } else {
           if (out) {
-            req.url = req.prefix + req.url;
+            req.url = req.prefix.pop() + req.url;
             // console.log("OUT: ", req.url);
             out(err);
           } else {
@@ -41,7 +42,7 @@ module.exports = function() {
         // if layer.fn is an app
         if ('function' == typeof layer.handle.handle) {
           var subapp = layer.handle;
-          req.prefix = layer.route;
+          req.prefix.push(layer.route);
           req.url = req.url.slice(layer.route.length);
           // console.log("IN: " + req.url);
           subapp(req, res, next);

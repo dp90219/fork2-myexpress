@@ -405,7 +405,7 @@ describe('Prefix path trimming', function() {
     superapp = myexpress();
 
     subapp.use('/bar', function(req, res) {
-      res.end('embedded app: ' + req.url);
+      res.end('embedded app: ' +  req.url);
     });
 
     app.use('/foo', subapp);
@@ -414,36 +414,36 @@ describe('Prefix path trimming', function() {
       res.end('handler: ' + req.url);
     });
 
-    // superapp('/a', app);
-    // superapp('/a', function(req, res) {
-    //   res.end('handler: ' + req.url);
-    // });
+    superapp.use('/a', app);
+    superapp.use('/a', function(req, res) {
+      res.end('handler: ' + req.url);
+    });
   });
 
   it('trims request path prefix when calling embedded app', function(done) {
-    request(app).get('/foo/bar').expect('embedded app: /bar').end(done);
+    request(superapp).get('/a/foo/bar').expect('embedded app: /bar').end(done);
   });
 
   it('restore trimmed request path to original when going to the next middleware', function(done) {
-    request(app).get('/foo').expect('handler: /foo').end(done);
-    // request(superapp).get('/a').expect('handler: /a').end(done);
+    // request(app).get('/foo').expect('handler: /foo').end(done);
+    request(superapp).get('/a').expect('handler: /a').end(done);
   });
   
-  describe("ensures leading slash", function() {
-    beforeEach(function() {
-      barapp = myexpress();
-      barapp.use('/', function(req, res) {
-        res.end('/bar');
-      });
-
-      app.use('/bar', barapp);
-    });
-
-    it('ensures that first char is / for trimmed path', function(done) {
-      // request(app).get('/bar/').expect('/bar').end(done);
-      request(app).get('/bar').expect('/bar').end(done);
-    });
-  });
- 
+//   describe("ensures leading slash", function() {
+//     beforeEach(function() {
+//       barapp = myexpress();
+//       barapp.use('/', function(req, res) {
+//         res.end('/bar');
+//       });
+// 
+//       app.use('/bar', barapp);
+//     });
+// 
+//     it('ensures that first char is / for trimmed path', function(done) {
+//       // request(app).get('/bar/').expect('/bar').end(done);
+//       request(app).get('/bar').expect('/bar').end(done);
+//     });
+//   });
+//  
 });
 
