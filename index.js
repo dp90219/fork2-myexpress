@@ -12,34 +12,59 @@ module.exports = function() {
     function next(err) {
       var layer = stack[index++];
       if (!layer) {
+
+
         if(err) {
-          if(out) out(err);
-          res.statusCode = 500;
-          res.end();
+          if (out) {
+            req.url = req.prefix + req.url;
+            // console.log("OUT: ", req.url);
+            out(err);
+          } else {
+            res.statusCode = 500;
+            res.end();
+          }
         } else {
-          if(out) out();
-          res.statusCode = 404;
-          res.end();
+          if (out) {
+            req.url = req.prefix + req.url;
+            // console.log("OUT: ", req.url);
+            out(err);
+          } else {
+
+            res.statusCode = 404;
+            res.end();
+          }
         }
         return;
       }
+
       if (layer.match(req.url)) {
-        req.params = layer.match(req.url).params;
-        try {
-          var arity = layer.handle.length;
-          if (err) {
-            if (arity === 4) {
-              layer.handle(err, req, res, next);
+        // if layer.fn is an app
+        if ('function' == typeof layer.handle.handle) {
+          var subapp = layer.handle;
+          req.prefix = layer.route;
+          req.url = req.url.slice(layer.route.length);
+          // console.log("IN: " + req.url);
+          subapp(req, res, next);
+
+        } else {
+
+          req.params = layer.match(req.url).params;
+          try {
+            var arity = layer.handle.length;
+            if (err) {
+              if (arity === 4) {
+                layer.handle(err, req, res, next);
+              } else {
+                next(err);
+              }
+            } else if (arity < 4) {
+              layer.handle(req, res, next);
             } else {
-              next(err);
+              next();
             }
-          } else if (arity < 4) {
-            layer.handle(req, res, next);
-          } else {
-            next();
+          } catch(e) {
+            next(e);
           }
-        } catch(e) {
-          next(e);
         }
       } else {
         next(err);
@@ -56,12 +81,12 @@ module.exports = function() {
       route = '/';
     }
 
-    if ('function' == typeof fn.handle) {
-      var server = fn;
-      fn = function(req, res, next) {
-        server.handle(req, res, next);
-      }
-    }
+    // if ('function' == typeof fn.handle) {
+    //   var server = fn;
+    //   fn = function(req, res, next) {
+    //     server.handle(req, res, next);
+    //   }
+    // }
 
     var layer = new Layer(route, fn);
     this.stack.push(layer);

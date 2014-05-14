@@ -1,11 +1,11 @@
-var my_express = require('../index');
+var myexpress = require('../index');
 var request = require('supertest');
 var http = require('http');
 var expect = require('chai').expect;
 var should = require('chai').should();
 
 describe('app', function() {
-  var app = my_express();
+  var app = myexpress();
   describe('create http server', function() {
     it("responds to /foo with 404", function(done){
       var server = http.createServer(app);
@@ -34,7 +34,7 @@ describe('app', function() {
     describe("calling middleware stack", function() {
       var app;
       beforeEach(function() {
-        app = my_express();
+        app = myexpress();
       });
       it('should call a single middleware', function(done) {
         var m1 = function(req, res, next) {
@@ -52,7 +52,7 @@ describe('app', function() {
 describe("Implement calling the middlewares",function() {
   var app;
   beforeEach(function() {
-    app = my_express();
+    app = myexpress();
   });
 
   it("Should be able to call a single middleware",function(done) {
@@ -105,7 +105,7 @@ describe("Implement calling the middlewares",function() {
 describe("Implement Error Handling",function() {
   var app;
   beforeEach(function() {
-    app = new my_express();
+    app = new myexpress();
   });
 
   it("should return 500 for unhandled error", function(done) {
@@ -164,10 +164,10 @@ describe("Implement Error Handling",function() {
 });
 
 describe("Implement App Embedding As Middleware",function() {
-  var app, subApp;
+  var app, subapp;
   beforeEach(function() {
-    app = new my_express();
-    subApp = new my_express();
+    app = new myexpress();
+    subapp = new myexpress();
   })
 
   it("should pass unhandled request to parent",function(done) {
@@ -175,15 +175,15 @@ describe("Implement App Embedding As Middleware",function() {
       res.end("m2");
     }
 
-    app.use(subApp);
+    app.use(subapp);
     app.use(m2);
 
     request(app).get("/").expect("m2").end(done);
   });
 
   it("should pass unhandled error to parent",function(done) {
-    app = new my_express();
-    subApp = new my_express();
+    app = new myexpress();
+    subapp = new myexpress();
 
     function m1(req,res,next) {
       next("m1 error");
@@ -193,9 +193,9 @@ describe("Implement App Embedding As Middleware",function() {
       res.end(err);
     }
 
-    subApp.use(m1);
+    subapp.use(m1);
 
-    app.use(subApp);
+    app.use(subapp);
     app.use(e1);
     request(app).get("/").expect("m1 error").end(done);
   });
@@ -239,7 +239,7 @@ describe("Layer class and the match method",function() {
 describe("app.use should add a Layer to stack",function() {
   var app, Layer;
   beforeEach(function() {
-    app = my_express();
+    app = myexpress();
     Layer = require("../lib/layer");
     app.use(function() {});
     app.use("/foo",function() {});
@@ -260,7 +260,7 @@ describe("app.use should add a Layer to stack",function() {
 describe("The middlewares called should match request path:",function() {
   var app;
   before(function() {
-    app = my_express();
+    app = myexpress();
     app.use("/foo",function(req,res,next) {
       res.end("foo");
     });
@@ -286,7 +286,7 @@ describe("The middlewares called should match request path:",function() {
 describe("The error handlers called should match request path:",function() {
   var app;
   before(function() {
-    app = my_express();
+    app = myexpress();
     app.use("/foo",function(req,res,next) {
       throw "boom!"
     });
@@ -366,7 +366,7 @@ describe("Path parameters extraction", function() {
 describe("Implement req.params", function() {
   var app;
   before(function() {
-    app = my_express();
+    app = myexpress();
     app.use("/foo/:a",function(req,res,next) {
       res.end(req.params.a);
     });
@@ -384,3 +384,66 @@ describe("Implement req.params", function() {
     request(app).get('/foo').expect('undefined').end(done);
   })
 });
+
+describe("app should have the handle method",function() {
+  var app;
+  before(function() {
+    app = myexpress();
+  });
+
+  it('should have the handle method', function() {
+    expect(app.handle).to.be.a('function');
+  });
+});
+
+
+describe('Prefix path trimming', function() {
+  var app, subapp, superapp, barapp;
+  beforeEach(function() {
+    app = myexpress();
+    subapp = myexpress();
+    superapp = myexpress();
+
+    subapp.use('/bar', function(req, res) {
+      res.end('embedded app: ' + req.url);
+    });
+
+    app.use('/foo', subapp);
+
+    app.use('/foo', function(req, res) {
+      res.end('handler: ' + req.url);
+    });
+
+    // superapp('/a', app);
+    // superapp('/a', function(req, res) {
+    //   res.end('handler: ' + req.url);
+    // });
+  });
+
+  it('trims request path prefix when calling embedded app', function(done) {
+    request(app).get('/foo/bar').expect('embedded app: /bar').end(done);
+  });
+
+  it('restore trimmed request path to original when going to the next middleware', function(done) {
+    request(app).get('/foo').expect('handler: /foo').end(done);
+    // request(superapp).get('/a').expect('handler: /a').end(done);
+  });
+  
+  describe("ensures leading slash", function() {
+    beforeEach(function() {
+      barapp = myexpress();
+      barapp.use('/', function(req, res) {
+        res.end('/bar');
+      });
+
+      app.use('/bar', barapp);
+    });
+
+    it('ensures that first char is / for trimmed path', function(done) {
+      // request(app).get('/bar/').expect('/bar').end(done);
+      request(app).get('/bar').expect('/bar').end(done);
+    });
+  });
+ 
+});
+
