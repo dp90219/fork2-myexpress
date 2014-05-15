@@ -1,6 +1,6 @@
 var request = require('supertest')
   , expect = require('chai').expect
-  , http = requrie('http');
+  , http = require('http');
 
 var express = require('../');
 var makeRoute = require('../lib/route');
@@ -19,6 +19,12 @@ describe('Add handlers to a route', function() {
   it('adds mutiple handlers to route', function() {
     expect(route.stack).to.have.length(2);
   });
-})
+
+  it('pushes action object to the stack', function() {
+    var action = route.stack[0];
+    expect(action).to.have.property("verb", 'get');
+    expect(action).to.have.property('handler', handler1);
+  });
+});
 
 

@@ -3,3 +3,4 @@
 5 [Simple Request Path Matcher](https://gist.github.com/hayeah/5933719969b041b1cfff)
 6 [Fancy Request Path Matcher](https://gist.github.com/hayeah/5a79837c9646b8398fd2)
 7 [HTTP Verbs](https://gist.github.com/hayeah/8af3c2c52427c3e8b3bb)
+8 [Route Chaining](https://gist.github.com/f0bf015fdeb0a08ffce5.git)
