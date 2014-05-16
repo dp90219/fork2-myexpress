@@ -429,21 +429,21 @@ describe('Prefix path trimming', function() {
     request(superapp).get('/a').expect('handler: /a').end(done);
   });
   
-//   describe("ensures leading slash", function() {
-//     beforeEach(function() {
-//       barapp = myexpress();
-//       barapp.use('/', function(req, res) {
-//         res.end('/bar');
-//       });
-// 
-//       app.use('/bar', barapp);
-//     });
-// 
-//     it('ensures that first char is / for trimmed path', function(done) {
-//       // request(app).get('/bar/').expect('/bar').end(done);
-//       request(app).get('/bar').expect('/bar').end(done);
-//     });
-//   });
-//  
+  describe("ensures leading slash", function() {
+    beforeEach(function() {
+      barapp = myexpress();
+      barapp.use('/', function(req, res) {
+        res.end('/bar');
+      });
+
+      app.use('/bar', barapp);
+    });
+
+    it('ensures that first char is / for trimmed path', function(done) {
+      // request(app).get('/bar/').expect('/bar').end(done);
+      request(app).get('/bar').expect('/bar').end(done);
+    });
+  });
+
 });
 

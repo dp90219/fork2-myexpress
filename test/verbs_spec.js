@@ -30,6 +30,7 @@ describe('All http verbs', function() {
   var mathods, app;
   methods = require('methods');
 
+  methods.push('all');
   beforeEach(function() {
     app = express();
   });
@@ -40,6 +41,7 @@ describe('All http verbs', function() {
         res.end('foo');
       });
       if (method == 'delete') method = 'del';
+      if (method === 'all') method = 'get';
 
       request(app)[method]('/foo').expect(200).end(done);
     });
