@@ -93,16 +93,16 @@ module.exports = function() {
   //   }
   // });
 
-  app.route = function(path) {
+  app.route = function(path, options) {
     var route = makeRoute();
-    var layer = new Layer(path, route);
+    var layer = new Layer(path, route, options);
     this.stack.push(layer);
     return route;
   }
 
   methods.forEach(function(method) {
     app[method] = function(path, handler) {
-      this.route(path)[method](handler);
+      this.route(path, {end: true})[method](handler);
       return this;
     }
   })
@@ -112,6 +112,11 @@ module.exports = function() {
     return server.listen.apply(server, arguments);
   };
 
+  app.factory = function(name, fn) {
+    this._factories[name] = fn;
+  }
+
   app.stack = [];
+  app._factories = {};
   return app;
 }

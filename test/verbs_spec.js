@@ -21,7 +21,7 @@ describe('App get method', function() {
     request(app).post('/foo').expect(404).end(done);
   });
 
-  it('should 404 for non whole path path', function(done) {
+  it('should 404 for non whole path request', function(done) {
     request(app).get('/foo/bar').expect(404).end(done);
   });
 })
