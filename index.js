@@ -130,4 +130,5 @@ module.exports = function() {
   app.stack = [];
   app._factories = {};
   return app;
+
 }
