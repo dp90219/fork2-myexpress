@@ -3,9 +3,13 @@ var methods = require('methods');
 var Layer = require('./lib/layer');
 var makeRoute = require('./lib/route');
 var createInjector = require('./lib/injector');
+var reqProto = require('./lib/request');
+var resProto = require('./lib/response');
 
 module.exports = function() {
   var app = function(req, res, out) {
+    app.monkey_patch(req, res);
+    req.app = app;
     app.handle(req, res, out);
   };
 
@@ -13,13 +17,17 @@ module.exports = function() {
     if(!req.prefix) req.prefix = [];
     var stack = this.stack;
     var index = 0;
-    function next(err) {
+    function next(err, isSub) {
+      //
+      if (isSub)
+        req.app = app;
+
       var layer = stack[index++];
       if (!layer) {
         if(err) {
           if (out) {
             req.url = req.prefix.pop() + req.url;
-            out(err);
+            out(err, isSub=true);
           } else {
             res.statusCode = 500;
             res.end();
@@ -27,7 +35,7 @@ module.exports = function() {
         } else {
           if (out) {
             req.url = req.prefix.pop() + req.url;
-            out(err);
+            out(err, isSub=true);
           } else {
 
             res.statusCode = 404;
@@ -110,6 +118,13 @@ module.exports = function() {
 
   app.inject = function(handler) {
     return createInjector(handler, app);
+  }
+  
+  app.monkey_patch = function(req, res) {
+    req.__proto__ = reqProto;
+    res.__proto__ = resProto;
+    res.__proto__.req = req;
+    req.__proto__.res = res;
   }
 
   app.stack = [];
