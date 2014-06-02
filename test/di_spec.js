@@ -18,7 +18,7 @@ describe("app.factory", function() {
     app.factory('foo', fn);
   });
 
-  it('should add a factory in app._facotries', function() {
+  it('should add a factory in app._factories', function() {
     expect(app._factories).to.be.an('object');
     expect(app._factories).to.have.property('foo', fn);
   });
@@ -111,6 +111,8 @@ describe('Implement Denpendencies Loader', function() {
       var req = 1
       , res = 2
       , next = 3;
+
+
       function handler(next, req, res) {};
       injector = inject(handler, app);
       loader = injector.dependencies_loader(req, res, next);
@@ -125,7 +127,7 @@ describe('Implement Denpendencies Loader', function() {
     it("can calls factories with req, res", function(done) {
       var req = 1,
           res = 2;
-    
+
       app.factory("foo", function(req, res, cb) {
         cb(null, [req, res, "foo"]);
       });
@@ -145,7 +147,63 @@ describe('Implement Denpendencies Loader', function() {
   });
 
 
+});
 
+describe("Implement Injector Invokation:", function() {
+  var app, injector;
+  beforeEach(function() {
+    app = express();
+    app.factory("foo", function fooFactory(req,res,next) {
+      next(null, "foo value");
+    });
+  });
 
+  it("can call injector as a request handler", function(done) {
+    var req = 1
+      , res = 2
+      , next = 3;
 
+    function handler(res, foo) {
+      // expect(next).to.equal(3);
+      expect(res).to.equal(2);
+      expect(foo).to.equal("foo value");
+      done();
+    }
+
+    injector = inject(handler, app);
+    injector(req, res);
+  });
+
+  it("calls next with error if injection fails", function(done) {
+    var req = 1
+      , res = 2;
+    function next(err) {
+      expect(err).to.be.instanceof(Error);
+      expect(err.message).to.equal("Factory not defined: unkown_dep");
+      done();
+    }
+    function handler(unkown_dep) {};
+    injector = inject(handler, app);
+    injector(req, res, next);
+
+  });
+
+});
+
+describe("Implement app.inject", function() {
+  var app;
+  beforeEach(function() {
+    app = express();
+    app.factory("foo", function(res, req, cb) {
+      cb(null, "hello from foo DI");
+    });
+  });
+
+  it("can create an injector", function(done) {
+    app.use(app.inject(function(res, foo) {
+      res.end(foo);
+    }));
+
+    request(app).get('/').expect("hello from foo DI").end(done);
+  });
 });

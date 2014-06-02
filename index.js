@@ -1,7 +1,8 @@
 var http = require('http');
+var methods = require('methods');
 var Layer = require('./lib/layer');
 var makeRoute = require('./lib/route');
-var methods = require('methods');
+var createInjector = require('./lib/injector');
 
 module.exports = function() {
   var app = function(req, res, out) {
@@ -84,15 +85,6 @@ module.exports = function() {
     return this;
   }
 
-  // methods.forEach(function(method) {
-  //   app[method] = function(path, handler) {
-  //     var fn = makeRoute(method.toUpperCase(), handler);
-  //     var layer = new Layer(path, fn, true);
-  //     this.stack.push(layer);
-  //     return this;
-  //   }
-  // });
-
   app.route = function(path, options) {
     var route = makeRoute();
     var layer = new Layer(path, route, options);
@@ -114,6 +106,10 @@ module.exports = function() {
 
   app.factory = function(name, fn) {
     this._factories[name] = fn;
+  }
+
+  app.inject = function(handler) {
+    return createInjector(handler, app);
   }
 
   app.stack = [];
