@@ -7,3 +7,4 @@
 - 9 [Express Dependency Injection](https://gist.github.com/hayeah/ff0c23ef1eb39f4dcd3a)
 - 10 [Monkey Patching Request And Response](https://gist.github.com/hayeah/b136e7631deaa362a716)
 - 11 [Content Negotiation](https://gist.github.com/hayeah/5b4f082bfc8ec24a268a)
+- 12 [req.send and Conditional Get](https://gist.github.com/hayeah/095cb6bfa54879efddcf)
